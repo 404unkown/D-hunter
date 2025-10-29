@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Deriv Pattern Bot - Over/Under with Immediate Re-entry</title>
+  <style>
+    :root{
+      --bg:#0f1220; --card:#141725; --muted:#9aa3b2; --accent:#00e0ff;
+      --green:#28a745; --red:#dc3545; --blue:#007bff; --glass: rgba(255,255,255,0.03);
+      --panel-radius:12px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#08090d 0%, #0f1220 100%);color:#e6eef6}
+    .wrap{max-width:980px;margin:28px auto;padding:20px;display:grid;grid-template-columns:360px 1fr;gap:20px}
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--panel-radius);padding:16px;box-shadow:0 6px 26px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+    .heading{display:flex;align-items:center;gap:12px}
+    .title{font-size:18px;color:var(--accent);font-weight:700}
+    label{display:block;font-size:13px;color:var(--muted);margin-top:12px}
+    input, select {
+      width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#0b0e16;color:#e6eef6;font-size:14px;
+    }
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .btn{width:100%;padding:10px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+    .btn-start{background:linear-gradient(90deg,var(--green),#1fa84a);color:#03220f}
+    .btn-stop{background:linear-gradient(90deg,#dc3545,#b72828);color:#fff}
+    .btn-test{background:linear-gradient(90deg,#ff9900,#ff7700);color:#1a0f00}
+    .center-wrap{display:flex;flex-direction:column;align-items:center;gap:14px}
+    #circle{width:150px;height:150px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:800;color:#fff;background:linear-gradient(180deg,#19202e,#0f1622);box-shadow:0 10px 30px rgba(2,6,23,0.6);transition:all .22s ease}
+    .pulse{animation:pulse 600ms ease-out}
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+    .flash-green{box-shadow:0 0 20px rgba(40,167,69,0.35);border:4px solid rgba(40,167,69,0.12)}
+    .flash-red{box-shadow:0 0 20px rgba(220,53,69,0.35);border:4px solid rgba(220,53,69,0.12)}
+    .flash-blue{box-shadow:0 0 20px rgba(0,123,255,0.25);border:4px solid rgba(0,123,255,0.08)}
+    .stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+    .stat{background:var(--glass);padding:8px 12px;border-radius:8px;font-size:13px;color:var(--muted)}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:8px 6px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:left}
+    th{color:var(--muted);font-weight:600;font-size:12px}
+    .log-wrap{height:320px;overflow:auto;padding-top:6px}
+    .small{font-size:12px;color:var(--muted)}
+    .status {display:inline-block;font-weight:700;padding:6px 10px;border-radius:10px}
+    .status.ok {background:rgba(40,167,69,0.12);color:var(--green)}
+    .status.bad {background:rgba(220,53,69,0.08);color:var(--red)}
+    .debug-section {margin-top: 12px; padding: 10px; background: rgba(255,0,0,0.05); border-radius: 8px; border: 1px solid rgba(255,0,0,0.1);}
+    .strategy-box {margin-top: 8px; padding: 10px; background: rgba(0,224,255,0.1); border-radius: 6px; border: 1px solid rgba(0,224,255,0.2);}
+    @media(max-width:860px){.wrap{grid-template-columns:1fr; padding:12px} #circle{width:120px;height:120px;font-size:36px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- LEFT: Controls -->
+    <div class="panel">
+      <div class="heading">
+        <div style="width:46px;height:46px;border-radius:10px;background:linear-gradient(90deg,var(--accent),#69f2ff);display:flex;align-items:center;justify-content:center;font-weight:900;color:#02181b">DB</div>
+        <div>
+          <div class="title">DERIV PATTERN BOT</div>
+          <div class="small">Over/Under with Pattern Detection & Immediate Re-entry</div>
+        </div>
+      </div>
+
+      <label>Deriv API Token</label>
+      <input id="token" type="password" placeholder="Your API token" />
+
+      <div style="margin-top:8px">
+        <span id="connStatus" class="status small">Disconnected</span>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>Market (symbol)</label>
+          <select id="market">
+            <option value="frxUSDJPY">Forex USD/JPY</option>
+            <option value="frxEURUSD">Forex EUR/USD</option>
+            <option value="frxGBPUSD">Forex GBP/USD</option>
+            <option value="R_100">Volatility 100 Index</option>
+            <option value="R_75">Volatility 75 Index</option>
+            <option value="1HZ100V">Volatility 100 (1s)</option>
+          </select>
+        </div>
+        <div>
+          <label>Trade Type</label>
+          <select id="tradeType">
+            <option value="DIGITOVER">Over</option>
+            <option value="DIGITUNDER">Under</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>Trade Digit (0-9)</label>
+          <select id="tradeDigit">
+            <option value="0">0</option><option value="1">1</option><option value="2" selected>2</option>
+            <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+            <option value="6">6</option><option value="7">7</option><option value="8">8</option>
+            <option value="9">9</option>
+          </select>
+        </div>
+        <div>
+          <label>Consecutive Pattern</label>
+          <input id="consecutiveCount" type="number" min="1" max="5" value="2" />
+        </div>
+      </div>
+
+      <!-- Strategy Display -->
+      <div class="strategy-box">
+        <div style="font-size:12px;color:var(--accent);text-align:center">
+          <div><strong>STRATEGY:</strong></div>
+          <div>Wait for <strong id="patternCountDisplay">2</strong> consecutive <strong id="oppositeTypeDisplay">Under 2</strong></div>
+          <div>Then trade <strong id="tradeTypeDisplay">Over 2</strong></div>
+          <div style="margin-top:4px;color:var(--green);font-size:11px">+ Immediate re-entry on loss with same number</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>Base Stake ($)</label>
+          <input id="stake" type="number" min="0.35" step="0.01" value="0.35" />
+        </div>
+        <div>
+          <label>Current Stake</label>
+          <input id="currentStake" type="text" value="$0.35" readonly style="background:rgba(255,255,255,0.05)" />
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>Target Profit ($)</label>
+          <input id="targetWin" type="number" min="0.01" step="0.01" value="2.00" />
+        </div>
+        <div>
+          <label>Stop Loss ($)</label>
+          <input id="targetLoss" type="number" min="0.01" step="0.01" value="5.00" />
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>Max Re-entries</label>
+          <input id="maxReentries" type="number" min="1" max="10" value="3" />
+        </div>
+        <div>
+          <label>Re-entry Multiplier</label>
+          <select id="multiplierType">
+            <option value="martingale">Martingale (2x)</option>
+            <option value="conservative">Conservative (1.5x)</option>
+            <option value="same">Same Stake</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn btn-start" id="startBtn" onclick="startBot()">Start Bot</button>
+        <button class="btn btn-stop" id="stopBtn" onclick="stopBot()">Stop Bot</button>
+        <button class="btn btn-test" id="testBtn" onclick="manualTestTrade()">Test Trade</button>
+      </div>
+
+      <!-- Debug Section -->
+      <div class="debug-section">
+        <div style="font-weight:700;color:#ff4444;margin-bottom:8px">Debug Tools</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="debugTickData()" style="padding:6px 10px;background:#333;color:#fff;border:none;border-radius:5px;font-size:11px;cursor:pointer">Check Ticks</button>
+          <button onclick="checkState()" style="padding:6px 10px;background:#333;color:#fff;border:none;border-radius:5px;font-size:11px;cursor:pointer">Check State</button>
+          <button onclick="forceReconnect()" style="padding:6px 10px;background:#333;color:#fff;border:none;border-radius:5px;font-size:11px;cursor:pointer">Reconnect</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="small">Last messages</div>
+      <div id="miniLog" style="height:120px;overflow:auto;margin-top:8px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);font-size:13px"></div>
+    </div>
+
+    <!-- RIGHT: Visual + Stats + Log -->
+    <div class="panel" style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="font-weight:700">Live Trading</div>
+        <div style="font-size:13px;color:var(--muted)">Symbol: <span id="liveSymbol">frxUSDJPY</span></div>
+      </div>
+
+      <div class="center-wrap">
+        <div id="circle">-</div>
+
+        <div class="stats" style="margin-bottom:4px">
+          <div class="stat">Total P&L: <strong id="totalProfit">$0.00</strong></div>
+          <div class="stat">Trades: <strong id="tradeCount">0</strong></div>
+          <div class="stat">Win Rate: <strong id="winRate">0%</strong></div>
+          <div class="stat">Loss Streak: <strong id="lossStreak">0</strong></div>
+          <div class="stat">Re-entries: <strong id="reentryCount">0</strong></div>
+          <div class="stat">Pattern: <strong id="patternProgress">0/2</strong></div>
+        </div>
+      </div>
+
+      <div style="font-weight:700;margin-top:6px">Trade Log</div>
+      <div class="log-wrap">
+        <table id="logTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th class="small">Time</th>
+              <th>Pattern</th>
+              <th>Stake</th>
+              <th>Trade</th>
+              <th>Result</th>
+              <th>Digit</th>
+              <th>P/L</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:6px;font-size:12px;color:var(--muted)">
+        <strong>Strategy:</strong> Waits for consecutive opposite pattern, trades, and immediately re-enters with same number on loss.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- State ----
+    let ws = null;
+    let keepAlivePing = null;
+    let connectionTimeout = null;
+    
+    const state = {
+      token: '',
+      market: 'frxUSDJPY',
+      baseStake: 0.35,
+      currentStake: 0.35,
+      lossStreak: 0,
+      consecutiveLosses: 0,
+      targetWin: 2.00,
+      targetLoss: 5.00,
+      totalProfit: 0,
+      totalWins: 0,
+      totalLosses: 0,
+      isRunning: false,
+      waitingResult: false,
+      contractId: null,
+      recentDigits: [],
+      lastEntryDigit: null,
+      tradeCount: 0,
+      lastTradeIndex: 0,
+      consecutiveNeeded: 2,
+      tradeType: 'DIGITOVER',
+      tradeDigit: 2,
+      patternCount: 0,
+      maxReentries: 3,
+      currentReentries: 0,
+      multiplierType: 'martingale',
+      lastLossDigit: null,
+      reentryDelayMs: 100,
+      reconnectDelayMs: 1000,
+      authorized: false
+    };
+
+    // ---- UI refs ----
+    const circle = document.getElementById('circle');
+    const miniLog = document.getElementById('miniLog');
+    const connStatus = document.getElementById('connStatus');
+    const liveSymbol = document.getElementById('liveSymbol');
+    const totalProfitEl = document.getElementById('totalProfit');
+    const tradeCountEl = document.getElementById('tradeCount');
+    const winRateEl = document.getElementById('winRate');
+    const lossStreakEl = document.getElementById('lossStreak');
+    const reentryCountEl = document.getElementById('reentryCount');
+    const patternProgressEl = document.getElementById('patternProgress');
+    const waitingFlagEl = document.getElementById('waitingFlag');
+    const logTableBody = document.querySelector('#logTable tbody');
+    
+    // Strategy display elements
+    const patternCountDisplay = document.getElementById('patternCountDisplay');
+    const oppositeTypeDisplay = document.getElementById('oppositeTypeDisplay');
+    const tradeTypeDisplay = document.getElementById('tradeTypeDisplay');
+
+    // ---- Helpers ----
+    function addMini(msg) {
+      const t = new Date().toLocaleTimeString();
+      miniLog.innerHTML = `<div style="margin-bottom:6px"><strong>[${t}]</strong> ${msg}</div>` + miniLog.innerHTML;
+      if (miniLog.children.length > 50) {
+        miniLog.removeChild(miniLog.lastChild);
+      }
+    }
+
+    function addLogRow(entry) {
+      state.lastTradeIndex += 1;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${state.lastTradeIndex}</td>
+                      <td class="small">${entry.time}</td>
+                      <td>${entry.pattern}</td>
+                      <td>$${entry.stake.toFixed(2)}</td>
+                      <td>${entry.tradeType}</td>
+                      <td style="color:${entry.result === 'WIN' ? 'var(--green)' : entry.result === 'LOSS' ? 'var(--red)' : 'var(--muted)'}">${entry.result}</td>
+                      <td>${entry.digit}</td>
+                      <td style="color:${entry.profit > 0 ? 'var(--green)' : entry.profit < 0 ? 'var(--red)' : 'var(--muted)'}">$${entry.profit.toFixed(2)}</td>`;
+      logTableBody.prepend(tr);
+    }
+
+    function setCircle(d, mode='normal') {
+      circle.textContent = (d === null || d === undefined) ? '-' : d;
+      circle.classList.remove('flash-green','flash-red','flash-blue','pulse');
+      void circle.offsetWidth;
+      circle.classList.add('pulse');
+      if (mode === 'trade') circle.classList.add('flash-blue');
+      else if (mode === 'win') circle.classList.add('flash-green');
+      else if (mode === 'loss') circle.classList.add('flash-red');
+    }
+
+    function updateStatsUI() {
+      totalProfitEl.textContent = `$${state.totalProfit.toFixed(2)}`;
+      tradeCountEl.textContent = `${state.tradeCount}`;
+      
+      const winRate = state.tradeCount > 0 ? ((state.totalWins / state.tradeCount) * 100).toFixed(1) : 0;
+      winRateEl.textContent = `${winRate}%`;
+      
+      lossStreakEl.textContent = `${state.lossStreak}`;
+      reentryCountEl.textContent = `${state.currentReentries}/${state.maxReentries}`;
+      patternProgressEl.textContent = `${state.patternCount}/${state.consecutiveNeeded}`;
+      document.getElementById('currentStake').value = `$${state.currentStake.toFixed(2)}`;
+      liveSymbol.textContent = state.market;
+      
+      // Update strategy display
+      updateStrategyDisplay();
+    }
+
+    function updateStrategyDisplay() {
+      const oppositeType = state.tradeType === 'DIGITOVER' ? 'DIGITUNDER' : 'DIGITOVER';
+      const oppositeText = oppositeType === 'DIGITOVER' ? 'Over' : 'Under';
+      const tradeText = state.tradeType === 'DIGITOVER' ? 'Over' : 'Under';
+      
+      patternCountDisplay.textContent = state.consecutiveNeeded;
+      oppositeTypeDisplay.textContent = `${oppositeText} ${state.tradeDigit}`;
+      tradeTypeDisplay.textContent = `${tradeText} ${state.tradeDigit}`;
+    }
+
+    function setConnStatus(ok, text) {
+      connStatus.textContent = text || (ok ? 'Connected' : 'Disconnected');
+      connStatus.className = 'status small ' + (ok ? 'ok' : 'bad');
+    }
+
+    // ---- Pattern Detection ----
+    function getOppositeTradeType() {
+      return state.tradeType === 'DIGITOVER' ? 'DIGITUNDER' : 'DIGITOVER';
+    }
+
+    function checkPatternCondition(digit, patternType, patternDigit) {
+      if (patternType === 'DIGITUNDER') {
+        return digit < patternDigit;
+      } else if (patternType === 'DIGITOVER') {
+        return digit > patternDigit;
+      }
+      return false;
+    }
+
+    // ---- Debug Functions ----
+    function debugTickData() {
+      addMini(`[DEBUG] Recent digits: ${state.recentDigits.slice(-10).join(', ')}`);
+      addMini(`[DEBUG] Total ticks: ${state.recentDigits.length}, Pattern: ${state.patternCount}/${state.consecutiveNeeded}`);
+      addMini(`[DEBUG] Market: ${state.market}, Running: ${state.isRunning}`);
+      console.log('Full state:', state);
+    }
+
+    function checkState() {
+      addMini(`[STATE] Running: ${state.isRunning}, Authorized: ${state.authorized}`);
+      addMini(`[STATE] WS Ready: ${ws?.readyState === WebSocket.OPEN ? 'OPEN' : ws?.readyState}`);
+      addMini(`[STATE] Trade: ${state.tradeType} ${state.tradeDigit} after ${state.consecutiveNeeded} consecutive ${getOppositeTradeType()}`);
+    }
+
+    function forceReconnect() {
+      addMini('[DEBUG] Manual reconnect triggered');
+      if (ws) {
+        try { ws.close(); } catch(e) {}
+      }
+      setTimeout(() => {
+        if (state.isRunning) connectWebsocket();
+      }, 500);
+    }
+
+    // ---- Start / Stop ----
+    function startBot() {
+      state.token = document.getElementById('token').value.trim();
+      state.market = (document.getElementById('market').value || 'frxUSDJPY').trim();
+      state.baseStake = parseFloat(document.getElementById('stake').value) || 0.35;
+      state.currentStake = state.baseStake;
+      state.targetWin = parseFloat(document.getElementById('targetWin').value) || 2.00;
+      state.targetLoss = parseFloat(document.getElementById('targetLoss').value) || 5.00;
+      state.consecutiveNeeded = parseInt(document.getElementById('consecutiveCount').value) || 2;
+      state.tradeType = document.getElementById('tradeType').value;
+      state.tradeDigit = parseInt(document.getElementById('tradeDigit').value);
+      state.maxReentries = parseInt(document.getElementById('maxReentries').value) || 3;
+      state.multiplierType = document.getElementById('multiplierType').value;
+      
+      state.recentDigits = [];
+      state.patternCount = 0;
+      state.totalProfit = 0;
+      state.totalWins = 0;
+      state.totalLosses = 0;
+      state.lossStreak = 0;
+      state.consecutiveLosses = 0;
+      state.currentReentries = 0;
+      state.tradeCount = 0;
+      state.lastTradeIndex = 0;
+      state.lastLossDigit = null;
+      
+      logTableBody.innerHTML = '';
+      setConnStatus(false, 'Connecting...');
+      
+      if (!state.token) { 
+        alert('Enter a valid API token'); 
+        setConnStatus(false,'No token'); 
+        return; 
+      }
+      
+      state.isRunning = true;
+      state.authorized = false;
+      
+      const tradeText = state.tradeType === 'DIGITOVER' ? 'Over' : 'Under';
+      const oppositeText = state.tradeType === 'DIGITOVER' ? 'Under' : 'Over';
+      
+      addMini(`Starting bot: Trade ${tradeText} ${state.tradeDigit} after ${state.consecutiveNeeded} consecutive ${oppositeText} ${state.tradeDigit}`);
+      addMini(`Re-entry: Max ${state.maxReentries} times with ${state.multiplierType} multiplier`);
+      
+      connectWebsocket();
+      updateStatsUI();
+    }
+
+    function stopBot() {
+      state.isRunning = false;
+      state.waitingResult = false;
+      state.authorized = false;
+      state.patternCount = 0;
+      state.currentReentries = 0;
+      state.lastLossDigit = null;
+      
+      if (keepAlivePing) { clearInterval(keepAlivePing); keepAlivePing = null; }
+      if (connectionTimeout) { clearTimeout(connectionTimeout); connectionTimeout = null; }
+      if (ws) try { ws.close(); } catch(e) {}
+      
+      setConnStatus(false,'Disconnected');
+      addMini('Bot stopped.');
+      setCircle('-', 'normal');
+      updateStatsUI();
+    }
+
+    // ---- Manual Test Trade ----
+    function manualTestTrade() {
+      if (!state.isRunning) {
+        alert('Start bot first');
+        return;
+      }
+      if (!state.authorized) {
+        alert('Not authorized - check API token');
+        return;
+      }
+      if (state.waitingResult) {
+        alert('Already waiting for trade result');
+        return;
+      }
+      addMini('[MANUAL] Manual trade test triggered');
+      placeTrade('MANUAL_TEST');
+    }
+
+    // ---- WebSocket connect & handlers ----
+    function connectWebsocket() {
+      try {
+        ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+        
+        connectionTimeout = setTimeout(() => {
+          if (ws && ws.readyState !== WebSocket.OPEN) {
+            addMini('[WS] Connection timeout - reconnecting...');
+            ws.close();
+            scheduleReconnect();
+          }
+        }, 10000);
+        
+      } catch (err) {
+        addMini('[WS] Failed to create socket: ' + err.message);
+        scheduleReconnect();
+        return;
+      }
+
+      ws.onopen = () => {
+        if (connectionTimeout) clearTimeout(connectionTimeout);
+        addMini('[WS] Connected, authorizing token...');
+        safeSend({ authorize: state.token });
+      };
+
+      ws.onerror = (e) => {
+        addMini('[WS] Error occurred');
+        console.error('WebSocket error:', e);
+      };
+
+      ws.onclose = () => {
+        if (connectionTimeout) clearTimeout(connectionTimeout);
+        addMini('[WS] Connection closed');
+        state.waitingResult = false;
+        state.authorized = false;
+        setConnStatus(false,'Disconnected');
+        updateStatsUI();
+        if (state.isRunning) scheduleReconnect();
+      };
+
+      ws.onmessage = (msg) => {
+        let data;
+        try { data = JSON.parse(msg.data); } catch (e) { 
+          addMini('[ERROR] Failed to parse WebSocket message');
+          return; 
+        }
+        try { handleWsMessage(data); } catch (err) { 
+          console.error('handleWsMessage error', err);
+          addMini('[ERROR] Message handling error: ' + err.message);
+        }
+      };
+    }
+
+    function safeSend(obj) {
+      try {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(obj));
+          return true;
+        } else {
+          addMini('[ERROR] WebSocket not open for sending');
+          return false;
+        }
+      } catch (e) { 
+        addMini('[ERROR] Failed to send message: ' + e.message);
+        return false;
+      }
+    }
+
+    function scheduleReconnect() {
+      if (!state.isRunning) return;
+      addMini(`[WS] Reconnect scheduled in ${state.reconnectDelayMs}ms`);
+      setTimeout(() => {
+        if (!state.isRunning) return;
+        addMini('[WS] Reconnecting...');
+        connectWebsocket();
+      }, state.reconnectDelayMs);
+    }
+
+    function startKeepAlive() {
+      if (keepAlivePing) clearInterval(keepAlivePing);
+      keepAlivePing = setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) safeSend({ ping: 1 });
+      }, 20000);
+    }
+
+    // ---- Trading Logic ----
+    function onNewTick(digit) {
+      state.recentDigits.push(digit);
+      if (state.recentDigits.length > 100) state.recentDigits.shift();
+
+      setCircle(digit, 'normal');
+      addMini(`[TICK] ${digit} | Recent: ${state.recentDigits.slice(-5).join(',')}`);
+
+      if (!state.isRunning) { updateStatsUI(); return; }
+      if (state.waitingResult) { updateStatsUI(); return; }
+
+      // If we're in re-entry mode (after a loss), check if we should trade
+      if (state.lastLossDigit !== null) {
+        addMini(`[REENTRY] Last loss digit was ${state.lastLossDigit}, checking current digit ${digit}`);
+        if (digit === state.lastLossDigit) {
+          addMini(`[REENTRY] MATCH! Current digit ${digit} equals last loss digit ${state.lastLossDigit} - TRADING!`);
+          state.lastLossDigit = null; // Reset for next cycle
+          placeTrade('REENTRY');
+          return;
+        }
+      }
+
+      // Normal pattern detection
+      const oppositeType = getOppositeTradeType();
+      const matchesPattern = checkPatternCondition(digit, oppositeType, state.tradeDigit);
+      
+      if (matchesPattern) {
+        state.patternCount++;
+        addMini(`[PATTERN] ${oppositeType === 'DIGITOVER' ? 'Over' : 'Under'} ${state.tradeDigit} detected! Count: ${state.patternCount}/${state.consecutiveNeeded}`);
+      } else {
+        // Reset pattern count if sequence breaks
+        if (state.patternCount > 0) {
+          addMini(`[PATTERN] Sequence broken. Reset count from ${state.patternCount} to 0`);
+        }
+        state.patternCount = 0;
+      }
+
+      // Check if we have enough consecutive pattern matches
+      if (state.patternCount >= state.consecutiveNeeded) {
+        const oppositeText = oppositeType === 'DIGITOVER' ? 'Over' : 'Under';
+        const tradeText = state.tradeType === 'DIGITOVER' ? 'Over' : 'Under';
+        
+        addMini(`[STRATEGY] PATTERN COMPLETE! ${state.consecutiveNeeded} consecutive ${oppositeText} ${state.tradeDigit} → Trading ${tradeText} ${state.tradeDigit}`);
+        state.patternCount = 0; // Reset for next pattern
+        placeTrade('PATTERN');
+      }
+
+      updateStatsUI();
+    }
+
+    function calculateNextStake() {
+      if (state.consecutiveLosses === 0) return state.baseStake;
+      
+      switch(state.multiplierType) {
+        case 'martingale':
+          return state.baseStake * Math.pow(2, state.consecutiveLosses);
+        case 'conservative':
+          return state.baseStake * Math.pow(1.5, state.consecutiveLosses);
+        case 'same':
+          return state.baseStake;
+        default:
+          return state.baseStake * Math.pow(2, state.consecutiveLosses);
+      }
+    }
+
+    function placeTrade(reason = 'PATTERN') {
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        addMini('[ERROR] WebSocket not connected — cannot place trade');
+        scheduleReconnect();
+        return;
+      }
+      if (!state.isRunning) {
+        addMini('[ERROR] Bot not running');
+        return;
+      }
+      if (state.waitingResult) {
+        addMini('[INFO] Skipped — still waiting for previous result');
+        return;
+      }
+
+      if (state.currentStake <= 0) {
+        addMini('[ERROR] Invalid stake amount');
+        return;
+      }
+
+      // Calculate stake based on consecutive losses
+      state.currentStake = calculateNextStake();
+      const stake = Number(state.currentStake.toFixed(2));
+
+      const proposalReq = {
+        "proposal": 1,
+        "amount": stake,
+        "basis": "stake",
+        "contract_type": state.tradeType,
+        "currency": "USD",
+        "duration": 5,
+        "duration_unit": "t",
+        "symbol": state.market,
+        "barrier": String(state.tradeDigit)
+      };
+
+      const tradeText = state.tradeType === 'DIGITOVER' ? 'Over' : 'Under';
+      addMini(`[TRADE:${reason}] Placing: ${tradeText} ${state.tradeDigit} stake=$${stake.toFixed(2)} on ${state.market}`);
+      addMini(`[STAKE] Consecutive losses: ${state.consecutiveLosses}, Current stake: $${stake.toFixed(2)}`);
+
+      try {
+        const sent = safeSend(proposalReq);
+        if (sent) {
+          state.waitingResult = true;
+          updateStatsUI();
+        } else {
+          addMini('[ERROR] Failed to send trade request');
+          state.waitingResult = false;
+        }
+      } catch (e) {
+        addMini('[ERROR] Exception sending proposal: ' + e.message);
+        state.waitingResult = false;
+        updateStatsUI();
+      }
+    }
+
+    function handleContractResult(profit, entryDigit, contractType) {
+      const p = Number(profit) || 0;
+      state.totalProfit += p;
+      state.tradeCount += 1;
+
+      const resultText = p > 0 ? 'WIN' : (p < 0 ? 'LOSS' : 'DRAW');
+      const tradeText = state.tradeType === 'DIGITOVER' ? 'Over' : 'Under';
+
+      if (p > 0) {
+        // WIN
+        state.totalWins++;
+        state.lossStreak = 0;
+        state.consecutiveLosses = 0;
+        state.currentReentries = 0;
+        state.lastLossDigit = null;
+        state.currentStake = state.baseStake;
+      } else if (p < 0) {
+        // LOSS
+        state.totalLosses++;
+        state.lossStreak++;
+        state.consecutiveLosses++;
+        state.currentReentries++;
+        
+        // Store the digit that caused the loss for re-entry
+        if (entryDigit !== null && entryDigit !== undefined) {
+          state.lastLossDigit = entryDigit;
+          addMini(`[REENTRY] Loss caused by digit ${entryDigit}. Will re-trade if this digit appears again.`);
+        }
+      }
+
+      const patternText = state.consecutiveNeeded > 1 ? `${state.consecutiveNeeded}×${getOppositeTradeType() === 'DIGITOVER' ? 'Over' : 'Under'}` : 'Manual';
+
+      const entry = {
+        time: new Date().toLocaleTimeString(),
+        pattern: patternText,
+        stake: Number(state.currentStake.toFixed(2)),
+        tradeType: `${tradeText} ${state.tradeDigit}`,
+        result: resultText,
+        digit: entryDigit !== null && entryDigit !== undefined ? entryDigit : '-',
+        profit: p
+      };
+
+      addLogRow(entry);
+      addMini(`[RESULT] ${tradeText} ${state.tradeDigit} ${resultText} $${p.toFixed(2)} | Total: $${state.totalProfit.toFixed(2)} | Win Rate: ${((state.totalWins / state.tradeCount) * 100).toFixed(1)}%`);
+
+      if (p > 0) {
+        setCircle(entryDigit ?? '-', 'win');
+        addMini(`[WIN] Reset stake to base: $${state.baseStake.toFixed(2)}`);
+      } else if (p < 0) {
+        setCircle(entryDigit ?? '-', 'loss');
+        addMini(`[LOSS] Consecutive losses: ${state.consecutiveLosses}, Next stake: $${calculateNextStake().toFixed(2)}`);
+        
+        // Check if we should attempt re-entry
+        if (state.currentReentries <= state.maxReentries && state.lastLossDigit !== null) {
+          addMini(`[REENTRY] Waiting for digit ${state.lastLossDigit} to re-enter trade...`);
+        } else if (state.currentReentries > state.maxReentries) {
+          addMini(`[REENTRY] Max re-entries (${state.maxReentries}) reached. Stopping.`);
+          stopBot();
+          return;
+        }
+      }
+
+      state.waitingResult = false;
+      updateStatsUI();
+
+      // Target checks
+      if (state.totalProfit >= state.targetWin) {
+        addMini(`[TARGET] Profit target reached: $${state.totalProfit.toFixed(2)} >= $${state.targetWin.toFixed(2)}`);
+        stopBot();
+        return;
+      }
+      if (state.totalProfit <= -Math.abs(state.targetLoss)) {
+        addMini(`[TARGET] Stop loss reached: $${state.totalProfit.toFixed(2)} <= -$${Math.abs(state.targetLoss).toFixed(2)}`);
+        stopBot();
+        return;
+      }
+    }
+
+    // ---- Message handling ----
+    function handleWsMessage(data) {
+      console.log('WS Message:', data);
+
+      if (data.msg_type === 'authorize') {
+        if (data.authorize) {
+          state.authorized = true;
+          setConnStatus(true, 'Authorized');
+          addMini('[AUTH] Token accepted. Subscribing ticks for ' + state.market);
+          safeSend({ ticks: state.market, subscribe: 1 });
+          startKeepAlive();
+        } else {
+          state.authorized = false;
+          setConnStatus(false, 'Invalid token');
+          addMini('[AUTH] Authorization failed');
+        }
+        return;
+      }
+
+      if (data.error && data.msg_type === 'authorize') {
+        state.authorized = false;
+        setConnStatus(false, 'Invalid token');
+        addMini('[AUTH][ERROR] ' + (data.error.message || JSON.stringify(data.error)));
+        state.isRunning = false;
+        return;
+      }
+
+      if (data.msg_type === 'tick') {
+        const quote = data.tick && data.tick.quote;
+        if (quote === undefined) {
+          addMini('[ERROR] No quote in tick data');
+          return;
+        }
+        const digit = parseInt(String(quote).slice(-1));
+        if (isNaN(digit)) {
+          addMini('[ERROR] Invalid digit from tick: ' + quote);
+          return;
+        }
+        onNewTick(digit);
+        return;
+      }
+
+      if (data.msg_type === 'proposal') {
+        const proposal = data.proposal;
+        if (!proposal) {
+          addMini('[ERROR] Empty proposal response');
+          state.waitingResult = false;
+          updateStatsUI();
+          return;
+        }
+        
+        const propId = proposal.id || (proposal.proposal && proposal.proposal.id) || null;
+        if (!propId) {
+          addMini('[ERROR] Could not find proposal id in response');
+          state.waitingResult = false;
+          updateStatsUI();
+          return;
+        }
+
+        addMini(`[PROPOSAL] Received proposal id=${propId}. Sending buy...`);
+        
+        const buyReq = {
+          "buy": propId,
+          "price": proposal.ask_price
+        };
+        
+        safeSend(buyReq);
+        return;
+      }
+
+      if (data.msg_type === 'buy') {
+        if (data.buy && data.buy.contract_id) {
+          state.contractId = data.buy.contract_id;
+          addMini(`[BUY] Contract purchased: id=${state.contractId}`);
+          safeSend({ 
+            "proposal_open_contract": 1, 
+            "contract_id": state.contractId, 
+            "subscribe": 1 
+          });
+        } else {
+          addMini('[ERROR] Buy failed: ' + JSON.stringify(data));
+          state.waitingResult = false;
+          updateStatsUI();
+        }
+        return;
+      }
+
+      if (data.msg_type === 'proposal_open_contract') {
+        const open = data.proposal_open_contract;
+        if (!open) return;
+        if (open.is_sold) {
+          const profit = parseFloat(open.profit) || 0;
+          let entryDigit = null;
+          
+          // Get the entry digit from the contract
+          if (open.entry_tick) {
+            try { 
+              entryDigit = parseInt(String(open.entry_tick).slice(-1)); 
+            } catch(e) { 
+              entryDigit = null; 
+            }
+          }
+          
+          // If we can't get from entry_tick, use the last known digit
+          if (entryDigit === null && state.recentDigits.length > 0) {
+            entryDigit = state.recentDigits[state.recentDigits.length - 1];
+          }
+          
+          handleContractResult(profit, entryDigit, open.contract_type || state.tradeType);
+        }
+        return;
+      }
+
+      if (data.error) {
+        addMini('[ERROR] ' + (data.error.message || JSON.stringify(data.error)));
+        if (data.error && typeof data.error === 'object' && data.error.code === 'AuthorizationError') {
+          state.authorized = false;
+          setConnStatus(false,'Invalid token');
+        }
+        state.waitingResult = false;
+        updateStatsUI();
+      }
+
+      updateStatsUI();
+    }
+
+    // Initialize
+    updateStatsUI();
+    setConnStatus(false,'Disconnected');
+
+    // Expose for debugging
+    window.DerivBot = {
+      state,
+      startBot,
+      stopBot,
+      manualTestTrade,
+      debugTickData,
+      checkState,
+      forceReconnect
+    };
+
+    addMini('Deriv Pattern Bot loaded. Configure your strategy and start trading.');
+  </script>
+</body>
+</html>
