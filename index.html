@@ -1,17 +1,1195 @@
-!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="https://www.bwmxmd.online/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BWM XMD - Tech Platform</title>
-    <meta name="description" content="BWM XMD - Advanced Tech Platform for WhatsApp Bots, Tools, and Web Services" />
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3232281576105359"
-     crossorigin="anonymous"></script>
-    <script type="module" crossorigin src="https://www.bwmxmd.online/assets/index-gl-aFLXs.js"></script>
-    <link rel="stylesheet" crossorigin href="https://www.bwmxmd.online/assets/index-CGiOxBUa.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Deriv Pro Trader - Luminous Martingale Bot</title>
+  <style>
+    :root {
+      --primary: #00f2fe;
+      --primary-glow: #00f2fe;
+      --secondary: #4facfe;
+      --success: #00ff88;
+      --danger: #ff416c;
+      --warning: #ffd166;
+      --background: #0a0e17;
+      --card: rgba(16, 18, 27, 0.8);
+      --text: #ffffff;
+      --text-light: #94a3b8;
+      --border: rgba(255, 255, 255, 0.1);
+      --glow: 0 0 20px rgba(0, 242, 254, 0.3);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0a0e17 0%, #1a1f35 50%, #0a0e17 100%);
+      color: var(--text);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    /* Luminous Background Effects */
+    .luminous-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(0, 242, 254, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(79, 172, 254, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(0, 255, 136, 0.08) 0%, transparent 50%);
+      z-index: -2;
+    }
+    
+    .grid-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(0, 242, 254, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: -1;
+    }
+    
+    .floating-element {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+      opacity: 0.1;
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 30px;
+      background: var(--card);
+      border-radius: 25px;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      box-shadow: var(--glow);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.1), transparent);
+      animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+    
+    .logo {
+      font-size: 48px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      text-shadow: 0 0 30px rgba(0, 242, 254, 0.5);
+    }
+    
+    .subtitle {
+      font-size: 18px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+    
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .panel {
+      background: var(--card);
+      border-radius: 25px;
+      padding: 30px;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      box-shadow: var(--glow);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+    
+    .trading-view {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .price-section {
+      text-align: center;
+      padding: 30px;
+      background: rgba(0, 242, 254, 0.05);
+      border-radius: 20px;
+      border: 1px solid rgba(0, 242, 254, 0.2);
+    }
+    
+    .price-display {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      font-weight: 900;
+      color: var(--background);
+      box-shadow: 
+        0 0 50px rgba(0, 242, 254, 0.5),
+        inset 0 0 20px rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .price-display::after {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      z-index: -1;
+      opacity: 0.6;
+      filter: blur(20px);
+    }
+    
+    .price-win {
+      background: linear-gradient(135deg, var(--success), #00cc7a);
+      box-shadow: 
+        0 0 50px rgba(0, 255, 136, 0.5),
+        inset 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    
+    .price-loss {
+      background: linear-gradient(135deg, var(--danger), #ff2b6b);
+      box-shadow: 
+        0 0 50px rgba(255, 65, 108, 0.5),
+        inset 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    
+    .market-info {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
+    }
+    
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    
+    .status-connected .status-dot {
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+      animation: pulse 2s infinite;
+    }
+    
+    .status-disconnected .status-dot {
+      background: var(--danger);
+      box-shadow: 0 0 10px var(--danger);
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 242, 254, 0.2);
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 5px;
+      text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-light);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .controls-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 15px 20px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn {
+      padding: 18px 24px;
+      border: none;
+      border-radius: 15px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--background);
+      box-shadow: 0 5px 20px rgba(0, 242, 254, 0.3);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, var(--success), #00cc7a);
+      color: var(--background);
+      box-shadow: 0 5px 20px rgba(0, 255, 136, 0.3);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger), #ff2b6b);
+      color: var(--background);
+      box-shadow: 0 5px 20px rgba(255, 65, 108, 0.3);
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 242, 254, 0.4);
+    }
+    
+    .strategy-card {
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(79, 172, 254, 0.1));
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      border-radius: 20px;
+      padding: 25px;
+      margin: 20px 0;
+      position: relative;
+    }
+    
+    .strategy-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+    
+    .strategy-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+    }
+    
+    .strategy-desc {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    .martingale-info {
+      background: linear-gradient(135deg, rgba(255, 209, 102, 0.1), rgba(255, 165, 0, 0.1));
+      border: 1px solid rgba(255, 209, 102, 0.3);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+    
+    .martingale-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--warning);
+      margin-bottom: 8px;
+      text-shadow: 0 0 10px rgba(255, 209, 102, 0.5);
+    }
+    
+    .log-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 25px;
+      border: 1px solid var(--border);
+      margin-top: 20px;
+    }
+    
+    .log-header {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .log-content {
+      height: 250px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    
+    .log-entry {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .log-time {
+      color: var(--text-light);
+      font-size: 12px;
+      font-weight: 600;
+      min-width: 70px;
+    }
+    
+    .log-message {
+      color: var(--text);
+      flex: 1;
+    }
+    
+    .log-trade {
+      color: var(--primary);
+      font-weight: 600;
+      text-shadow: 0 0 5px rgba(0, 242, 254, 0.5);
+    }
+    
+    .log-win {
+      color: var(--success);
+      font-weight: 600;
+      text-shadow: 0 0 5px rgba(0, 255, 136, 0.5);
+    }
+    
+    .log-loss {
+      color: var(--danger);
+      font-weight: 600;
+      text-shadow: 0 0 5px rgba(255, 65, 108, 0.5);
+    }
+    
+    .reentry-badge {
+      background: var(--warning);
+      color: var(--background);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    
+    .markets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .market-btn {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .market-btn:hover, .market-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--background);
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .controls-section {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+      
+      .panel {
+        padding: 20px;
+      }
+      
+      .price-display {
+        width: 140px;
+        height: 140px;
+        font-size: 48px;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Luminous Background -->
+  <div class="luminous-bg"></div>
+  <div class="grid-overlay"></div>
+  
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">DERIV PRO TRADER</div>
+      <div class="subtitle">Luminous Martingale Bot with Immediate Re-entry</div>
+    </div>
+    
+    <!-- Main Dashboard -->
+    <div class="dashboard">
+      <!-- Left Panel - Trading View & Controls -->
+      <div class="panel">
+        <!-- Price Display -->
+        <div class="price-section">
+          <div class="price-display" id="priceDisplay">-</div>
+          <div class="market-info" id="marketInfo">Volatility 10 Index</div>
+          <div class="status" id="connectionStatus">
+            <div class="status-dot"></div>
+            <span>Disconnected</span>
+          </div>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="totalProfit">$0.00</div>
+            <div class="stat-label">Total P&L</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="totalTrades">0</div>
+            <div class="stat-label">Total Trades</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="winRate">0%</div>
+            <div class="stat-label">Win Rate</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="currentStake">$0.35</div>
+            <div class="stat-label">Current Stake</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="lossStreak">0</div>
+            <div class="stat-label">Loss Streak</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="reentryCount">0/5</div>
+            <div class="stat-label">Re-entries Used</div>
+          </div>
+        </div>
+        
+        <!-- Trading Log -->
+        <div class="log-section">
+          <div class="log-header">
+            <span>Live Trading Activity</span>
+            <span id="patternProgress">Pattern: 0/2</span>
+          </div>
+          <div class="log-content" id="tradingLog">
+            <div class="log-entry">
+              <span class="log-time">[00:00:00]</span>
+              <span class="log-message">Welcome! Configure your strategy and start trading.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Panel - Controls & Markets -->
+      <div class="panel">
+        <!-- API Connection -->
+        <div class="form-group">
+          <label for="apiToken">🔑 Deriv API Token</label>
+          <input type="password" id="apiToken" placeholder="Enter your API token">
+        </div>
+        
+        <!-- All Volatility Markets -->
+        <div class="form-group">
+          <label>📈 Trading Markets</label>
+          <div class="markets-grid">
+            <button class="market-btn active" data-market="R_10">V10</button>
+            <button class="market-btn" data-market="R_25">V25</button>
+            <button class="market-btn" data-market="R_50">V50</button>
+            <button class="market-btn" data-market="R_75">V75</button>
+            <button class="market-btn" data-market="R_100">V100</button>
+            <button class="market-btn" data-market="1HZ10V">V10 1s</button>
+            <button class="market-btn" data-market="1HZ25V">V25 1s</button>
+            <button class="market-btn" data-market="1HZ50V">V50 1s</button>
+            <button class="market-btn" data-market="1HZ75V">V75 1s</button>
+            <button class="market-btn" data-market="1HZ100V">V100 1s</button>
+          </div>
+        </div>
+        
+        <!-- Trading Strategy -->
+        <div class="form-group">
+          <label>🎯 Trading Strategy</label>
+          <div class="controls-section">
+            <select id="tradeDirection">
+              <option value="DIGITOVER">📈 Over</option>
+              <option value="DIGITUNDER">📉 Under</option>
+            </select>
+            <select id="tradeBarrier">
+              <option value="2">Digit 2</option>
+              <option value="3">Digit 3</option>
+              <option value="4">Digit 4</option>
+              <option value="5">Digit 5</option>
+              <option value="6">Digit 6</option>
+              <option value="7">Digit 7</option>
+              <option value="8">Digit 8</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Pattern Settings -->
+        <div class="form-group">
+          <label>🔄 Pattern Detection</label>
+          <div class="controls-section">
+            <input type="number" id="patternCount" value="2" min="1" max="5" placeholder="Consecutive Count">
+            <select id="patternType">
+              <option value="opposite">Opposite Pattern</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Stake Management -->
+        <div class="form-group">
+          <label>💰 Stake Settings ($)</label>
+          <div class="controls-section">
+            <input type="number" id="baseStake" value="0.35" min="0.35" step="0.01" placeholder="Base Stake">
+            <input type="number" id="maxStake" value="10.00" min="1.00" step="0.01" placeholder="Max Stake">
+          </div>
+        </div>
+        
+        <!-- Risk Management -->
+        <div class="form-group">
+          <label>⚖️ Risk Management ($)</label>
+          <div class="controls-section">
+            <input type="number" id="profitTarget" value="5.00" min="1.00" step="0.01" placeholder="Profit Target">
+            <input type="number" id="stopLoss" value="10.00" min="1.00" step="0.01" placeholder="Stop Loss">
+          </div>
+        </div>
+        
+        <!-- Martingale System -->
+        <div class="martingale-info">
+          <div class="martingale-title">⚡ MARTINGALE RE-ENTRY SYSTEM</div>
+          <div style="font-size: 12px; color: var(--text-light);">
+            • Immediate re-entry when same digit appears after loss<br>
+            • 2x stake increase on each loss<br>
+            • Max 5 consecutive re-entries
+          </div>
+        </div>
+        
+        <!-- Strategy Display -->
+        <div class="strategy-card">
+          <div class="strategy-title">ACTIVE STRATEGY</div>
+          <div class="strategy-desc">
+            Trade <strong id="currentTradeType">Over 2</strong> after 
+            <strong id="currentPatternCount">2</strong> consecutive 
+            <strong id="currentPatternType">Under 2</strong><br>
+            <span style="color: var(--warning);">⚡ Martingale: Immediate re-entry with 2x stake</span>
+          </div>
+        </div>
+        
+        <!-- Control Buttons -->
+        <div class="controls-section" style="margin-top: 20px;">
+          <button class="btn btn-success" onclick="startTrading()">
+            <span>▶️</span> START TRADING
+          </button>
+          <button class="btn btn-danger" onclick="stopTrading()">
+            <span>⏹️</span> STOP TRADING
+          </button>
+        </div>
+        <button class="btn btn-primary" style="margin-top: 10px; width: 100%;" onclick="testTrade()">
+          <span>🔧</span> TEST SINGLE TRADE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Trading Bot State
+    const state = {
+      ws: null,
+      isConnected: false,
+      isTrading: false,
+      token: '',
+      market: 'R_10',
+      tradeType: 'DIGITOVER',
+      barrier: 2,
+      patternCount: 2,
+      baseStake: 0.35,
+      currentStake: 0.35,
+      totalProfit: 0,
+      totalTrades: 0,
+      wins: 0,
+      losses: 0,
+      lossStreak: 0,
+      consecutiveLosses: 0,
+      maxReentries: 5,
+      currentReentries: 0,
+      patternProgress: 0,
+      recentDigits: [],
+      waitingForResult: false,
+      contractId: null,
+      lastLossDigit: null
+    };
+
+    // Initialize floating elements
+    function initFloatingElements() {
+      const colors = ['#00f2fe', '#4facfe', '#00ff88', '#ff416c'];
+      for (let i = 0; i < 15; i++) {
+        const element = document.createElement('div');
+        element.className = 'floating-element';
+        element.style.width = Math.random() * 100 + 50 + 'px';
+        element.style.height = element.style.width;
+        element.style.left = Math.random() * 100 + '%';
+        element.style.top = Math.random() * 100 + '%';
+        element.style.background = `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]} 0%, transparent 70%)`;
+        element.style.animationDelay = Math.random() * 5 + 's';
+        element.style.animationDuration = Math.random() * 10 + 10 + 's';
+        document.body.appendChild(element);
+      }
+    }
+
+    // Update Statistics Display
+    function updateStats() {
+      document.getElementById('totalProfit').textContent = `$${state.totalProfit.toFixed(2)}`;
+      document.getElementById('totalTrades').textContent = state.totalTrades;
+      document.getElementById('currentStake').textContent = `$${state.currentStake.toFixed(2)}`;
+      document.getElementById('lossStreak').textContent = state.lossStreak;
+      document.getElementById('reentryCount').textContent = `${state.currentReentries}/${state.maxReentries}`;
+      document.getElementById('patternProgress').textContent = `Pattern: ${state.patternProgress}/${state.patternCount}`;
+      
+      const winRate = state.totalTrades > 0 ? ((state.wins / state.totalTrades) * 100).toFixed(1) : 0;
+      document.getElementById('winRate').textContent = `${winRate}%`;
+      
+      // Update strategy display
+      const oppositeType = state.tradeType === 'DIGITOVER' ? 'Under' : 'Over';
+      document.getElementById('currentTradeType').textContent = `${state.tradeType === 'DIGITOVER' ? 'Over' : 'Under'} ${state.barrier}`;
+      document.getElementById('currentPatternCount').textContent = state.patternCount;
+      document.getElementById('currentPatternType').textContent = `${oppositeType} ${state.barrier}`;
+      
+      // Update market info
+      document.getElementById('marketInfo').textContent = 
+        document.querySelector('.market-btn.active').textContent + ' Index';
+    }
+
+    // Add log message
+    function addLog(message, type = 'info') {
+      const time = new Date().toLocaleTimeString();
+      const logEntry = document.createElement('div');
+      logEntry.className = 'log-entry';
+      
+      let messageClass = 'log-message';
+      if (type === 'trade') messageClass = 'log-trade';
+      else if (type === 'win') messageClass = 'log-win';
+      else if (type === 'loss') messageClass = 'log-loss';
+      
+      logEntry.innerHTML = `
+        <span class="log-time">[${time}]</span>
+        <span class="${messageClass}">${message}</span>
+      `;
+      
+      document.getElementById('tradingLog').appendChild(logEntry);
+      document.getElementById('tradingLog').scrollTop = document.getElementById('tradingLog').scrollHeight;
+    }
+
+    // Update price display
+    function updatePriceDisplay(digit, type = 'normal') {
+      const display = document.getElementById('priceDisplay');
+      display.textContent = digit;
+      display.className = 'price-display';
+      
+      if (type === 'win') {
+        display.classList.add('price-win');
+      } else if (type === 'loss') {
+        display.classList.add('price-loss');
+      }
+    }
+
+    // Update connection status
+    function updateConnectionStatus(connected) {
+      const status = document.getElementById('connectionStatus');
+      if (connected) {
+        status.className = 'status status-connected';
+        status.innerHTML = '<div class="status-dot"></div><span>Connected</span>';
+      } else {
+        status.className = 'status status-disconnected';
+        status.innerHTML = '<div class="status-dot"></div><span>Disconnected</span>';
+      }
+    }
+
+    // Market selection
+    function initMarketSelection() {
+      const marketBtns = document.querySelectorAll('.market-btn');
+      marketBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          marketBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.market = btn.dataset.market;
+          updateStats();
+          
+          if (state.isConnected && state.isTrading) {
+            state.ws.send(JSON.stringify({
+              ticks: state.market,
+              subscribe: 1
+            }));
+          }
+        });
+      });
+    }
+
+    // WebSocket Connection
+    function connectWebSocket() {
+      try {
+        state.ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+        
+        state.ws.onopen = () => {
+          state.isConnected = true;
+          updateConnectionStatus(true);
+          addLog('🔗 WebSocket connected. Authorizing...', 'info');
+          
+          state.ws.send(JSON.stringify({
+            authorize: state.token
+          }));
+        };
+        
+        state.ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          handleWebSocketMessage(data);
+        };
+        
+        state.ws.onclose = () => {
+          state.isConnected = false;
+          updateConnectionStatus(false);
+          addLog('🔌 WebSocket disconnected', 'info');
+          
+          if (state.isTrading) {
+            setTimeout(connectWebSocket, 2000);
+          }
+        };
+        
+        state.ws.onerror = (error) => {
+          addLog('❌ WebSocket error occurred', 'info');
+        };
+        
+      } catch (error) {
+        addLog('❌ Failed to connect to WebSocket', 'info');
+      }
+    }
+
+    // Handle WebSocket messages
+    function handleWebSocketMessage(data) {
+      if (data.msg_type === 'authorize') {
+        if (data.authorize) {
+          addLog('✅ Successfully authorized with Deriv', 'info');
+          state.ws.send(JSON.stringify({
+            ticks: state.market,
+            subscribe: 1
+          }));
+        } else {
+          addLog('❌ Authorization failed - check your API token', 'info');
+        }
+        return;
+      }
+      
+      if (data.msg_type === 'tick') {
+        const digit = parseInt(data.tick.quote.toString().slice(-1));
+        handleNewTick(digit);
+        return;
+      }
+      
+      if (data.msg_type === 'proposal') {
+        if (data.proposal) {
+          const proposalId = data.proposal.id;
+          addLog(`📊 Proposal received, buying contract...`, 'trade');
+          
+          state.ws.send(JSON.stringify({
+            buy: proposalId,
+            price: data.proposal.ask_price
+          }));
+        }
+        return;
+      }
+      
+      if (data.msg_type === 'buy') {
+        if (data.buy) {
+          state.contractId = data.buy.contract_id;
+          addLog(`✅ Contract purchased (ID: ${state.contractId})`, 'trade');
+          
+          state.ws.send(JSON.stringify({
+            proposal_open_contract: 1,
+            contract_id: state.contractId,
+            subscribe: 1
+          }));
+        }
+        return;
+      }
+      
+      if (data.msg_type === 'proposal_open_contract') {
+        const contract = data.proposal_open_contract;
+        if (contract.is_sold) {
+          const profit = parseFloat(contract.profit);
+          let entryDigit = null;
+          
+          if (contract.entry_tick) {
+            try { 
+              entryDigit = parseInt(String(contract.entry_tick).slice(-1)); 
+            } catch(e) { 
+              entryDigit = null; 
+            }
+          }
+          
+          if (entryDigit === null && state.recentDigits.length > 0) {
+            entryDigit = state.recentDigits[state.recentDigits.length - 1];
+          }
+          
+          handleTradeResult(profit, entryDigit);
+        }
+        return;
+      }
+      
+      if (data.error) {
+        addLog(`❌ Error: ${data.error.message}`, 'info');
+        state.waitingForResult = false;
+      }
+    }
+
+    // Handle new tick data
+    function handleNewTick(digit) {
+      state.recentDigits.push(digit);
+      if (state.recentDigits.length > 50) state.recentDigits.shift();
+      
+      updatePriceDisplay(digit);
+      addLog(`🔢 Tick: ${digit} | Recent: ${state.recentDigits.slice(-5).join(', ')}`, 'info');
+      
+      if (!state.isTrading || state.waitingForResult) return;
+      
+      // Check for immediate re-entry (Martingale)
+      if (state.lastLossDigit !== null && digit === state.lastLossDigit) {
+        addLog(`⚡ MARTINGALE RE-ENTRY! Digit ${digit} matches last loss`, 'trade');
+        state.lastLossDigit = null;
+        placeTrade('MARTINGALE_REENTRY');
+        return;
+      }
+      
+      // Normal pattern detection
+      const oppositeType = state.tradeType === 'DIGITOVER' ? 'DIGITUNDER' : 'DIGITOVER';
+      const matchesPattern = checkPatternCondition(digit, oppositeType, state.barrier);
+      
+      if (matchesPattern) {
+        state.patternProgress++;
+        addLog(`🔄 Pattern matched! Progress: ${state.patternProgress}/${state.patternCount}`, 'info');
+      } else {
+        state.patternProgress = 0;
+      }
+      
+      if (state.patternProgress >= state.patternCount) {
+        addLog(`🎯 PATTERN COMPLETE! Placing ${state.tradeType === 'DIGITOVER' ? 'Over' : 'Under'} ${state.barrier} trade`, 'trade');
+        state.patternProgress = 0;
+        placeTrade('PATTERN');
+      }
+      
+      updateStats();
+    }
+
+    // Check pattern condition
+    function checkPatternCondition(digit, patternType, barrier) {
+      if (patternType === 'DIGITUNDER') {
+        return digit < barrier;
+      } else if (patternType === 'DIGITOVER') {
+        return digit > barrier;
+      }
+      return false;
+    }
+
+    // Place a trade
+    function placeTrade(reason = 'PATTERN') {
+      if (!state.isConnected || state.waitingForResult) return;
+      
+      state.waitingForResult = true;
+      
+      const proposalRequest = {
+        proposal: 1,
+        amount: state.currentStake,
+        basis: "stake",
+        contract_type: state.tradeType,
+        currency: "USD",
+        duration: 5,
+        duration_unit: "t",
+        symbol: state.market,
+        barrier: state.barrier.toString()
+      };
+      
+      state.ws.send(JSON.stringify(proposalRequest));
+      
+      const tradeTypeText = state.tradeType === 'DIGITOVER' ? 'Over' : 'Under';
+      let logMessage = `📊 Placing ${tradeTypeText} ${state.barrier} | Stake: $${state.currentStake.toFixed(2)}`;
+      
+      if (reason === 'MARTINGALE_REENTRY') {
+        logMessage = `⚡ ${logMessage} [MARTINGALE RE-ENTRY #${state.currentReentries}]`;
+      }
+      
+      addLog(logMessage, 'trade');
+    }
+
+    // Handle trade result with immediate Martingale re-entry
+    function handleTradeResult(profit, entryDigit) {
+      state.waitingForResult = false;
+      state.totalTrades++;
+      state.totalProfit += profit;
+      
+      if (profit > 0) {
+        // WIN
+        state.wins++;
+        state.lossStreak = 0;
+        state.consecutiveLosses = 0;
+        state.currentReentries = 0;
+        state.lastLossDigit = null;
+        state.currentStake = state.baseStake;
+        
+        updatePriceDisplay(entryDigit || '-', 'win');
+        addLog(`✅ WIN! Profit: +$${profit.toFixed(2)} | Total: $${state.totalProfit.toFixed(2)} | Reset stake to $${state.baseStake.toFixed(2)}`, 'win');
+      } else {
+        // LOSS - Immediate Martingale re-entry setup
+        state.losses++;
+        state.lossStreak++;
+        state.consecutiveLosses++;
+        state.currentReentries++;
+        
+        // Store the digit that caused the loss for immediate re-entry
+        if (entryDigit !== null) {
+          state.lastLossDigit = entryDigit;
+          addLog(`❌ LOSS! Digit: ${entryDigit} | Profit: $${profit.toFixed(2)} | Next stake: $${(state.currentStake * 2).toFixed(2)}`, 'loss');
+          addLog(`⚡ Waiting for digit ${entryDigit} to re-enter with Martingale...`, 'trade');
+        }
+        
+        // Martingale: Double the stake for next trade
+        state.currentStake = Math.min(state.currentStake * 2, parseFloat(document.getElementById('maxStake').value));
+        
+        updatePriceDisplay(entryDigit || '-', 'loss');
+      }
+      
+      updateStats();
+      
+      // Check stop conditions
+      const profitTarget = parseFloat(document.getElementById('profitTarget').value);
+      const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+      
+      if (state.totalProfit >= profitTarget) {
+        addLog(`🎯 PROFIT TARGET REACHED! Stopping trading.`, 'win');
+        stopTrading();
+      } else if (state.totalProfit <= -stopLoss) {
+        addLog(`💥 STOP LOSS REACHED! Stopping trading.`, 'loss');
+        stopTrading();
+      } else if (state.currentReentries > state.maxReentries) {
+        addLog(`🚫 MAX RE-ENTRIES (${state.maxReentries}) REACHED! Stopping trading.`, 'loss');
+        stopTrading();
+      }
+    }
+
+    // Control Functions
+    function startTrading() {
+      state.token = document.getElementById('apiToken').value.trim();
+      state.tradeType = document.getElementById('tradeDirection').value;
+      state.barrier = parseInt(document.getElementById('tradeBarrier').value);
+      state.patternCount = parseInt(document.getElementById('patternCount').value);
+      state.baseStake = parseFloat(document.getElementById('baseStake').value);
+      state.currentStake = state.baseStake;
+      
+      if (!state.token) {
+        addLog('❌ Please enter your Deriv API token', 'info');
+        return;
+      }
+      
+      state.isTrading = true;
+      state.patternProgress = 0;
+      state.currentReentries = 0;
+      state.consecutiveLosses = 0;
+      state.lastLossDigit = null;
+      state.recentDigits = [];
+      
+      addLog(`🚀 STARTING TRADING: ${document.querySelector('.market-btn.active').textContent}`, 'trade');
+      addLog(`🎯 Strategy: ${state.tradeType === 'DIGITOVER' ? 'Over' : 'Under'} ${state.barrier} after ${state.patternCount} consecutive patterns`, 'info');
+      addLog(`⚡ Martingale: Immediate re-entry on loss with 2x stake (Max ${state.maxReentries} re-entries)`, 'info');
+      
+      if (!state.isConnected) {
+        connectWebSocket();
+      } else {
+        state.ws.send(JSON.stringify({
+          ticks: state.market,
+          subscribe: 1
+        }));
+      }
+      
+      updateStats();
+    }
+
+    function stopTrading() {
+      state.isTrading = false;
+      state.patternProgress = 0;
+      state.currentReentries = 0;
+      state.lastLossDigit = null;
+      addLog('🛑 TRADING STOPPED', 'info');
+    }
+
+    function testTrade() {
+      if (!state.isConnected) {
+        addLog('❌ Please connect first by starting trading', 'info');
+        return;
+      }
+      addLog('🔧 MANUAL TEST TRADE TRIGGERED', 'trade');
+      placeTrade('MANUAL_TEST');
+    }
+
+    // Initialize
+    initFloatingElements();
+    initMarketSelection();
+    updateStats();
+    addLog('🌟 Deriv Pro Trader initialized with Martingale re-entry system!', 'info');
+  </script>
+</body>
 </html>
